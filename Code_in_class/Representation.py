@@ -13,6 +13,8 @@ True
 >>> from fractions import Fraction
 >>> half = Fraction(1, 2)
 >>> repr(half)
+>>> print(half)
+1/2
 'Fraction(1, 2)'
 >>> str(half)
 '1/2'
