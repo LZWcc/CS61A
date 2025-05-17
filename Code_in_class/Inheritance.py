@@ -89,3 +89,68 @@ class C(B):
 a = A()
 b = B(1)
 b.n = 5
+
+class Ratio:
+    """
+    >>> half = Ratio(1, 2)
+    >>> print(half)
+    1/2
+    >>> half
+    Ratio(1, 2)
+
+    >>> Ratio(1, 3) + Ratio(1, 6)
+    Ratio(1, 2)
+    
+    >>> Ratio(1, 3).__add__(Ratio(1, 6))
+    Ratio(1, 2)
+    """
+    def __init__(self, n, d):
+        self.numer = n
+        self.denom = d
+
+    def __repr__(self):
+        return 'Ratio({0}, {1})'.format(self.numer, self.denom)
+    
+    def __str__(self):
+        return '{0}/{1}'.format(self.numer, self.denom)
+    
+    def __add__(self, other):
+        if isinstance(other, int):
+            return Ratio(self.numer + other * self.denom, self.denom)
+        new_numer = self.numer * other.denom + other.numer * self.denom
+        new_denom = self.denom * other.denom
+    
+    # 计算最大公约数并约分
+        import math
+        gcd = math.gcd(new_numer, new_denom)
+        new_numer //= gcd
+        new_denom //= gcd
+        return Ratio(new_numer, new_denom)
+                
+"""
+__init__ 方法在对象被构造时自动调用.
+__repr__ 方法在对象被打印时自动调用.
+__add__ 用于将一个对象与另一个对象相加.
+__bool__ 用于将一个对象转换为布尔值.
+__float__ 用于将一个对象转换为浮点数.
+
+>>> zero, one, two = 0 , 1, 2
+>>> one + two
+3
+>>> bool(zero), bool(one)
+(True, False)
+
+>>> one.__add__(two)
+3
+>>> zero.__bool__(), one.__bool__()
+(False, True)
+
+
+"""
+
+"""
+isinstance(object, classinfo)
+object: 要检查的对象
+classinfo: 可以是一个类或类型元组
+返回值: 如果 object 是 classinfo 的实例或子类的实例，则返回 True, 否则返回 False。
+"""
