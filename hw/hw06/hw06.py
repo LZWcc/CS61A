@@ -49,6 +49,10 @@ class VendingMachine:
     """
     def __init__(self, product, price):
         """Set the product and its price, as well as other instance attributes."""
+        self.product = product     # product表示产品名称
+        self.price = price
+        self.stock = 0
+        self.balance = 0
         "*** YOUR CODE HERE ***"
 
     def restock(self, n):
@@ -56,6 +60,8 @@ class VendingMachine:
 
         E.g., Current candy stock: 3
         """
+        self.stock += n
+        return f'Current {self.product} stock: {self.stock}'
         "*** YOUR CODE HERE ***"
 
     def add_funds(self, n):
@@ -68,6 +74,11 @@ class VendingMachine:
 
         E.g., Current balance: $4
         """
+        if self.stock == 0:
+            return f'Nothing left to vend. Please restock. Here is your ${n}.'
+        else:
+            self.balance += n
+            return f'Current balance: ${self.balance}'
         "*** YOUR CODE HERE ***"
 
     def vend(self):
@@ -81,6 +92,18 @@ class VendingMachine:
         E.g., Nothing left to vend. Please restock.
               Please add $3 more funds.
         """
+        if self.stock == 0:
+            return 'Nothing left to vend. Please restock.'
+        elif self.balance - self.price < 0:
+            return f'Please add ${abs(self.balance - self.price)} more funds.'
+        else:
+            res = self.balance - self.price
+            self.balance = 0
+            self.stock -= 1
+            if res == 0:
+                return f'Here is your {self.product}.'
+            return f'Here is your {self.product} and ${res} change.'
+
         "*** YOUR CODE HERE ***"
 
 
@@ -103,7 +126,25 @@ def store_digits(n):
     >>> cleaned = re.sub(r"#.*\\n", '', re.sub(r'"{3}[\s\S]*?"{3}', '', inspect.getsource(store_digits)))
     >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
     """
+    # solution
+    result = Link.empty
+    while n > 0:
+        result = Link(n % 10, result)
+        n //= 10
+    return result
     "*** YOUR CODE HERE ***"
+    """if n < 10:
+        return Link(n)
+    tmp = n
+    cnt = 0
+    while tmp > 0:
+        tmp //= 10
+        cnt-=-1
+    power = 10 ** (cnt - 1)
+    first = n // power
+    rest = n % power
+    return Link(first, store_digits(rest))
+    """
 
 
 def deep_map_mut(func, s):
@@ -125,6 +166,14 @@ def deep_map_mut(func, s):
     >>> print(link1)
     <9 <16> 25 36>
     """
+    if s is Link.empty:
+        return None
+    elif isinstance(s.first, Link): # 如果当前节点的first是嵌套链表
+        deep_map_mut(func, s.first)
+    else:
+        s.first = func(s.first)
+    deep_map_mut(func, s.rest)
+    # 原地修改链表，而不是创建新的链表，所以不需要返回任何值
     "*** YOUR CODE HERE ***"
 
 
@@ -145,11 +194,11 @@ def prune_small(t, n):
     >>> t3
     Tree(6, [Tree(1), Tree(3, [Tree(1), Tree(2)])])
     """
-    while ____:
-        largest = max(____, key=____)
+    while len(t.branches) > n:
+        largest = max(t.branches, key=lambda x : x.label)
         t.branches.remove(largest)
     for b in t.branches:
-        ____
+        prune_small(b, n)
 
 
 def delete(t, x):
@@ -172,13 +221,14 @@ def delete(t, x):
     Tree(1, [Tree(4), Tree(5), Tree(3, [Tree(6)]), Tree(6), Tree(7), Tree(8), Tree(4)])
     """
     new_branches = []
-    for _________ in ________________:
-        _______________________
+    for b in t.branches:
+        delete(b, x)
         if b.label == x:
-            __________________________________
+            new_branches.extend(b.branches) # 将子节点的子节点添加到父节点的新分支列表
+            # 将被删除节点的所有子分支添加到新的分支列表中，相当于这些子节点直接连接到了父节点。
         else:
-            __________________________________
-    t.branches = ___________________
+            new_branches.append(b)
+    t.branches = new_branches
 
 
 def two_list(vals, counts):
