@@ -125,7 +125,19 @@ class Ant(Insect):
             place.ant = self
         else:
             # BEGIN Problem 8b
-            assert place.ant is None, 'Too many ants in {0}'.format(place)
+            # assert place.ant is None, 'Too many ants in {0}'.format(place)
+            # 检查当前蚂蚁是否可以容纳位置上已有的蚂蚁(当前蚂蚁是容器)
+            if self.can_contain(place.ant):
+                # 将位置上已有的蚂蚁存储到容器蚂蚁内部
+                self.store_ant(place.ant)
+                # 将位置的 ant 属性更新为当前的容器蚂蚁，实际上是替换了位置上原有的蚂蚁
+                place.ant = self
+            # 检查位置上已有的蚂蚁是否可以容纳当前蚂蚁(原有蚂蚁是容器)
+            elif place.ant.can_contain(self):
+                # 我们希望容器蚂蚁 (place.ant) 包含当前蚂蚁 (self)
+                place.ant.store_ant(self) 
+            else:
+                assert False, 'Too many ants in {0}'.format(place)
             # END Problem 8b
         Insect.add_to(self, place)
 
@@ -291,6 +303,23 @@ class WallAnt(Ant):
 class HungryAnt(Ant):
     name = 'Hungry'
     food_cost = 4
+    chew_cooldown = 3
+    implemented = True
+    def __init__(self, health = 1):
+        super().__init__(health)
+        self.cooldown = 0
+    
+    def action(self, gamestate):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        else:
+            place = self.place
+            if place.bees:
+                bee = random_bee(place.bees)
+                bee.reduce_health(bee.health)
+                self.cooldown = self.chew_cooldown
+
+
 # END Problem 7
 
 
@@ -306,11 +335,13 @@ class ContainerAnt(Ant):
 
     def can_contain(self, other):
         # BEGIN Problem 8a
+        return self.ant_contained is None and not other.is_container
         "*** YOUR CODE HERE ***"
         # END Problem 8a
 
     def store_ant(self, ant):
         # BEGIN Problem 8a
+        self.ant_contained = ant
         "*** YOUR CODE HERE ***"
         # END Problem 8a
 
@@ -331,6 +362,8 @@ class ContainerAnt(Ant):
 
     def action(self, gamestate):
         # BEGIN Problem 8a
+        if self.ant_contained is not None:
+            self.ant_contained.action(gamestate)
         "*** YOUR CODE HERE ***"
         # END Problem 8a
 
