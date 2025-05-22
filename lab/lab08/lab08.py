@@ -172,6 +172,7 @@ def insert_into_all(item, nested_list):
     >>> insert_into_all(0, nl)
     [[0], [0, 1, 2], [0, 3]]
     """
+    return [[item] + x for x in nested_list]
     "*** YOUR CODE HERE ***"
 
 def subseqs(s):
@@ -184,11 +185,14 @@ def subseqs(s):
     >>> subseqs([])
     [[]]
     """
-    if ________________:
-        ________________
+    # rest_s被赋值为[[], [3], [2], [2, 3]]
+    # 执行insert_into_all(1, rest_s)，生成[[1], [1, 3], [1, 2], [1, 2, 3]]
+    if s == []:
+        return [s]
     else:
-        ________________
-        ________________
+        rest_s = subseqs(s[1:])
+        return rest_s + insert_into_all(s[0], rest_s)
+        # 不包含第一个元素的子序列 + 包含第一个元素的子序列
 
 
 def non_decrease_subseqs(s):
@@ -207,14 +211,14 @@ def non_decrease_subseqs(s):
     """
     def subseq_helper(s, prev):
         if not s:
-            return ____________________
+            return [[]]
         elif s[0] < prev:
-            return ____________________
+            return subseq_helper(s[1:], prev)
         else:
-            a = ______________________
-            b = ______________________
-            return insert_into_all(________, ______________) + ________________
-    return subseq_helper(____, ____)
+            a = subseq_helper(s[1:], s[0]) # 包含当前元素, 下一个元素的prev需要更新为当前元素
+            b = subseq_helper(s[1:], prev) # 不包含当前元素, prev保持不变
+            return insert_into_all(s[0], a) + b
+    return subseq_helper(s, 0)
 
 
 def perms(seq):
@@ -239,6 +243,12 @@ def perms(seq):
     >>> sorted(perms("ab"))
     [['a', 'b'], ['b', 'a']]
     """
+    if not seq:
+        yield []
+    else:
+        for p in perms(seq[1:]):
+            for i in range(len(seq)):
+                yield p[:i] + [seq[0]] + p[i:]
     "*** YOUR CODE HERE ***"
 
 
@@ -267,9 +277,9 @@ def shuffle_pairs(lst):
     []
     """
     assert len(lst) % 2 == 0, 'len(lst) must be even'
-    half = ________________
-    for ____ in ____:
-        _____, _____ = _____, _____
+    half = len(lst) // 2
+    for i in range(half):
+        lst[2*i], lst[2*i+1] = lst[2*i+1], lst[2*i]
 
 
 def common_players(roster):
@@ -296,6 +306,15 @@ def common_players(roster):
     Team C ['beatrice']
     Team D ['ben']
     """
+    result_dict = {}
+    for player in roster:
+        team = roster[player]
+        # 如果存在，将 player 添加到对应 team 的列表中
+        if team in result_dict:
+            result_dict[team].append(player)
+        else:
+            result_dict[team] = [player]
+    return result_dict
     "*** YOUR CODE HERE ***"
     
 
@@ -368,9 +387,22 @@ class Player:
         self.random_func = random_func
 
     def debate(self, other):
+        random = self.random_func()
+        p1 = self.popularity
+        p2 = other.popularity
+        tmp = p1 / (p1 + p2)
+        p = max(0.1, tmp)
+        if random < p:
+            self.popularity =  max(0, 50 + self.popularity)
+        else:
+            self.popularity = max(0, self.popularity - 50)
         "*** YOUR CODE HERE ***"
 
     def speech(self, other):
+        gain = self.popularity // 10
+        self.votes += gain
+        self.popularity += gain
+        other.popularity = max(0, other.popularity - other.popularity // 10)
         "*** YOUR CODE HERE ***"
 
     def choose(self, other):
@@ -402,13 +434,27 @@ class Game:
 
     def play(self):
         while not self.game_over():
-            "*** YOUR CODE HERE ***"
+            if self.turn % 2 == 0:
+                curr, other = self.p1, self.p2
+            else:
+                curr, other = self.p2, self.p1
+            # curr.choose(other)(other)
+            action = curr.choose(other)
+            action(other)
+            self.turn += 1
+        "*** YOUR CODE HERE ***"
         return self.winner()
 
     def game_over(self):
         return max(self.p1.votes, self.p2.votes) >= 50 or self.turn >= 10
 
     def winner(self):
+        if self.p1.votes > self.p2.votes:
+            return self.p1
+        elif self.p1.votes < self.p2.votes:
+            return self.p2
+        else:
+            return None
         "*** YOUR CODE HERE ***"
 
 
@@ -432,6 +478,10 @@ class AggressivePlayer(Player):
     True
     """
     def choose(self, other):
+        if self.popularity <= other.popularity:
+            return self.debate
+        else:
+            return self.speech
         "*** YOUR CODE HERE ***"
 
 class CautiousPlayer(Player):
@@ -449,6 +499,10 @@ class CautiousPlayer(Player):
     True
     """
     def choose(self, other):
+        if self.popularity == 0:
+            return self.debate
+        else:
+            return self.speech
         "*** YOUR CODE HERE ***"
 
 
@@ -469,6 +523,11 @@ def every_other(s):
     >>> singleton
     Link(4)
     """
+    if s is Link.empty or s.rest is Link.empty:
+        return
+    else:
+        s.rest = s.rest.rest
+        every_other(s.rest)
     "*** YOUR CODE HERE ***"
 
 
@@ -480,6 +539,25 @@ def slice_link(link, start, end):
     >>> print(new)
     <1 4 1>
     """
+    # 不需要包含任何元素（切片长度为0），所以返回空链表
+    if end == 0:
+        return Link.empty
+    # 当前元素应该被包含在结果中，因为起始索引是0
+    # 创建一个新的 Link 节点，其 first 是当前链表的第一个元素
+    # 递归调用 slice_link 处理链表的其余部分，保持 start 为0，但 end 减1
+    elif start == 0:
+        # 已经消耗了一个元素位置。当我们把当前元素 link.first 放入结果中后
+        # 需要从剩余元素 link.rest 中再获取 end - 1 个元素，而不是 end 个。
+        return Link(link.first, slice_link(link.rest, 0, end - 1))
+    else:
+        # 当 start > 0 时，我们需要跳过当前元素 link.first
+        # 跳过这个元素后，我们需要更新接下来要跳过的元素数量
+        """
+        减少 end 的原因
+        同时，我们也需要更新 end。由于我们已经消耗了一个位置 (跳过了当前元素), 所以在链表的剩余部分中, 结束位置也要相应减少。
+        原来我们要从当前位置取到 end 位置的元素，现在跳过了当前位置，所以相对于剩余链表，结束位置变成了 end - 1。
+        """
+        return slice_link(link.rest, start-1, end-1)
     "*** YOUR CODE HERE ***"
 
 
