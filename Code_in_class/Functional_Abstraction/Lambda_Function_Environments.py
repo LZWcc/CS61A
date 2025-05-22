@@ -2,7 +2,7 @@ a = 1
 def f(g):
     a = 2
     return lambda y : a * g(y)
-f(lambda a : a + y)(a)
+# f(lambda a : a + y)(a)
 
 
 """观察以下代码的环境图"""
