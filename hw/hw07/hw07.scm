@@ -1,3 +1,5 @@
+; 启动scheme编译器:
+; python3 scheme -i hw07.scm
 (define (square n) (* n n))
 
 (define (pow base exp)              ; 函数定义
@@ -20,6 +22,7 @@
 
 (define (caddr s) (car (cddr s)))
 
+(define x 15)
 (cond ((> x 10) (print 'big))
       ((> x 5) (print 'medium))
       (else (print 'small)))
