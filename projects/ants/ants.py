@@ -137,7 +137,7 @@ class Ant(Insect):
                 # 我们希望容器蚂蚁 (place.ant) 包含当前蚂蚁 (self)
                 place.ant.store_ant(self) 
             else:
-                assert False, 'Too many ants in {0}'.format(place)
+                                (interleave '(1 2) '(3 4))
             # END Problem 8b
         Insect.add_to(self, place)
 
