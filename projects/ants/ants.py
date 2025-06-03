@@ -375,11 +375,27 @@ class ProtectorAnt(ContainerAnt):
     food_cost = 4
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 8c
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+    def __init__(self, health=2):
+        super().__init__(health)
     # END Problem 8c
 
 # BEGIN Problem 9
 # The TankAnt class
+class TankAnt(ContainerAnt):
+    name = 'Tank'
+    food_cost =  6
+    implemented = True
+    damage = 1
+    def __init__(self, health=2):
+        super().__init__(health)
+    
+    def action(self, gamestate):
+        place = self.place
+        if place.bees:  # bees是一个列表
+            for bee in list(place.bees): # 使用副本避免迭代时修改列表
+                bee.reduce_health(self.damage)
+        super().action(gamestate)
 # END Problem 9
 
 
