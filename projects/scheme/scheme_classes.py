@@ -8,7 +8,7 @@ class SchemeError(Exception):
 ################
 # Environments #
 ################
-
+# 描述 Scheme 表达式的 Python 类
 class Frame:
     """An environment frame binds Scheme symbols to Scheme values."""
 
@@ -26,12 +26,17 @@ class Frame:
     def define(self, symbol, value):
         """Define Scheme SYMBOL to have VALUE."""
         # BEGIN PROBLEM 1
+        self.bindings[symbol] = value
         "*** YOUR CODE HERE ***"
         # END PROBLEM 1
 
     def lookup(self, symbol):
         """Return the value bound to SYMBOL. Errors if SYMBOL is not found."""
         # BEGIN PROBLEM 1
+        if symbol in self.bindings:
+            return self.bindings[symbol]
+        elif self.parent is not None:
+            return self.parent.lookup(symbol)
         "*** YOUR CODE HERE ***"
         # END PROBLEM 1
         raise SchemeError('unknown identifier: {0}'.format(symbol))

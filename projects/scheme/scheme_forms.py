@@ -7,6 +7,7 @@ from scheme_builtins import *
 # Special Forms #
 #################
 
+# 用于评估 Scheme 中特殊形式的 Python 函数（例如 define、lambda 和 cond 等）
 # Each of the following do_xxx_form functions takes the cdr of a special form as
 # its first argument---a Scheme list representing a special form without the
 # initial identifying symbol (if, lambda, quote, ...). Its second argument is
@@ -36,7 +37,19 @@ def do_define_form(expressions, env):
         # assigning a name to a value e.g. (define x (+ 1 2))
         validate_form(expressions, 2, 2) # Checks that expressions is a list of length exactly 2
         # BEGIN PROBLEM 4
+
+        # expressions.rest.first 取到的是要绑定的表达式（比如 (+ 1 2)）。
+        # scheme_eval(expressions.rest.first, env) 会递归地对这个表达式求值，直到得到最终结果（比如 3）。
+        value = scheme_eval(expressions.rest.first, env)
+        # Frame.define(env, signature, value) == env.define(signature, value)
+        # 对象.方法(参数) 这种写法，就是在调用该对象所属类的方法，并自动把对象本身作为第一个参数（即 self）。
+        env.define(signature, value)
+        return signature
         "*** YOUR CODE HERE ***"
+        """
+        def define(self, symbol, value):
+            self.bindings[symbol] = value
+        """
         # END PROBLEM 4
     elif isinstance(signature, Pair) and scheme_symbolp(signature.first):
         # defining a named procedure e.g. (define (f x y) (+ x y))
@@ -56,6 +69,7 @@ def do_quote_form(expressions, env):
     """
     validate_form(expressions, 1, 1)
     # BEGIN PROBLEM 5
+    return expressions.first
     "*** YOUR CODE HERE ***"
     # END PROBLEM 5
 

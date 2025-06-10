@@ -9,7 +9,7 @@ import scheme_forms
 ##############
 # Eval/Apply #
 ##############
-
+# Scheme 表达式的递归计算器
 def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     """Evaluate Scheme expression EXPR in Frame ENV.
 
@@ -33,10 +33,18 @@ def scheme_eval(expr, env, _=None): # Optional third argument is ignored
         return scheme_forms.SPECIAL_FORMS[first](rest, env)
     else:
         # BEGIN PROBLEM 3
+        operator = scheme_eval(first, env)
+        operands = rest.map(lambda operand: scheme_eval(operand, env))
+        return scheme_apply(operator, operands, env)
         "*** YOUR CODE HERE ***"
         # END PROBLEM 3
-
-def scheme_apply(procedure, args, env):
+"""
+3. procedure 的作用
+procedure 是一个过程对象, 可能是内置过程(BuiltinProcedure)、lambda 过程(LambdaProcedure)、mu 过程(MuProcedure)等。
+对于内置过程, procedure.py_func 是实际执行的 Python 函数, procedure.need_env 表示是否需要环境参数。
+scheme_apply 的作用就是根据 procedure 的类型，把参数和环境正确地传递给它，实现 Scheme 过程的调用。
+"""
+def scheme_apply(procedure, args, env): # 过程对象, 参数值的schcme列表(Pair对象或nil), 当前环境
     """Apply Scheme PROCEDURE to argument values ARGS (a Scheme list) in
     Frame ENV, the current environment."""
     validate_procedure(procedure)
@@ -44,10 +52,21 @@ def scheme_apply(procedure, args, env):
        assert False, "Not a Frame: {}".format(env)
     if isinstance(procedure, BuiltinProcedure):
         # BEGIN PROBLEM 2
+        result = []
+        while args is not nil:
+            result.append(args.first)
+            args = args.rest
+        # 有些 Scheme 内置过程（比如 eval）需要知道当前的环境（Frame），以便在这个环境下执行表达式。
+        # 这些过程的 Python 实现会多一个参数，专门用来接收环境对象。
+        # # procedure.need_env 是一个布尔值，表示这个过程是否需要环境参数。如果需要，就把当前环境 env 加到参数列表 result 的最后。
+        if procedure.need_env == True:
+            result.append(env)
         "*** YOUR CODE HERE ***"
         # END PROBLEM 2
         try:
             # BEGIN PROBLEM 2
+            # "参数拆包"语法，会把列表里的每个元素作为单独的参数传给函数。
+            return procedure.py_func(*result)
             "*** YOUR CODE HERE ***"
             # END PROBLEM 2
         except TypeError as err:
