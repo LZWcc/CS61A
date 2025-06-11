@@ -68,3 +68,10 @@ x       ; (1, 2)
 
 ;;;(apply quotient '(10 5)) ; 2
 ;;;(apply + '(1 2 3 4))
+(define (f x total)
+  (if (< x 10)
+    (f (+ x 2) (+ total (* x x)))
+    total
+  )
+)
+(f 2 0)
