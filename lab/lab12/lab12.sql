@@ -31,11 +31,21 @@ CREATE TABLE sharing AS
   GROUP BY a.course;
 
 CREATE TABLE pairs AS
-  SELECT "REPLACE THIS LINE WITH YOUR SOLUTION";
+  SELECT a.room || " and " || b.room || " together have " || (a.seats + b.seats) || " seats"
+  FROM sizes AS a, sizes AS b
+  WHERE a.seats + b.seats >= 1000 AND a.room < b.room
+  ORDER BY a.seats + b.seats DESC;
 
 CREATE TABLE big AS
-  SELECT "REPLACE THIS LINE WITH YOUR SOLUTION";
+  SELECT course FROM finals, sizes
+  WHERE hall = room
+  GROUP BY course
+  HAVING SUM(seats) >= 1000;
 
+-- 选择course, remaining 列
 CREATE TABLE remaining AS
-  SELECT "REPLACE THIS LINE WITH YOUR SOLUTION";
+  SELECT course, SUM(seats) - MAX(seats) AS remaining 
+  FROM finals, sizes
+  WHERE hall = room
+  GROUP BY course;
 
